@@ -5,7 +5,6 @@ import random
 random.seed(0)
 
 
-@app.before_request
 def seed():
     with app.app_context():
         db.create_all()

@@ -6,8 +6,6 @@ class Invoice(db.Model):
     amount = db.Column(db.Float)
     status = db.Column(db.String(20))
     requisite_id = db.Column(db.Integer, db.ForeignKey('requisite.id'))
-    # requisite = db.relationship('Requisite', backref='invoices')
-
 
     def to_dict(self):
         return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
