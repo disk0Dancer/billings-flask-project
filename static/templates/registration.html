@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h1>Вход</h1>
+    <div class="btn-group float-right mb-3">
+        <form method="post" action="/registration" id="registrationForm" class="form-contact">
+            <p>
+                <label>Логин</label>
+                <input name="login" type="text" placeholder="type login here" required/>
+            </p>
+            <p>
+                <label>Пароль</label>
+                <input name="password" type="text" placeholder="type password here" required/>
+            </p>
+            <p><input type="submit" value="Регистрация"/></p>
+            <p><a href="/login">Вход</a></p>
+        </form>
+    </div>
+
+  </div>
+{% endblock %}
