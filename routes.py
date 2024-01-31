@@ -48,7 +48,7 @@ def requisites():
 @app.route('/users')
 def users():
     users = User.query.all()
-    return render_template('requisite.html', users=users)
+    return render_template('user.html', users=users)
 
 
 @app.route('/create_invoice',  methods=['POST'])
