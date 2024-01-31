@@ -1,6 +1,7 @@
 from app import app, db
 from models.invoice import Invoice
 from models.requisite import Requisite
+from models.user import User
 import random
 random.seed(0)
 
@@ -37,3 +38,11 @@ def seed():
             invoice = Invoice(**options)
             db.session.add(invoice)
             db.session.commit()
+
+        admin = User(id=1, login="admin", password="admin", role="admin")
+        db.session.add(admin)
+        db.session.commit()
+
+        user = User(id=2, login="user", password="user", role="user")
+        db.session.add(user)
+        db.session.commit()
