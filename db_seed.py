@@ -1,7 +1,5 @@
 from app import app, db
-from models.invoice import Invoice
-from models.requisite import Requisite
-from models.user import User
+from models import *
 
 from werkzeug.security import generate_password_hash, check_password_hash
 import random
