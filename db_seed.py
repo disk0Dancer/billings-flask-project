@@ -2,6 +2,8 @@ from app import app, db
 from models.invoice import Invoice
 from models.requisite import Requisite
 from models.user import User
+
+from werkzeug.security import generate_password_hash, check_password_hash
 import random
 random.seed(0)
 
@@ -39,10 +41,13 @@ def seed():
             db.session.add(invoice)
             db.session.commit()
 
-        admin = User(id=1, login="admin", password="admin", role="admin")
+
+        pwd_hash = generate_password_hash("admin")
+        admin = User(id=1, login="admin", password=pwd_hash, role="admin")
         db.session.add(admin)
         db.session.commit()
 
-        user = User(id=2, login="user", password="user", role="user")
+        pwd_hash = generate_password_hash("user")
+        user = User(id=2, login="user", password=pwd_hash, role="user")
         db.session.add(user)
         db.session.commit()
