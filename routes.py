@@ -1,13 +1,19 @@
-from app import app, db
+from app import app, db, LoginManager
 from documentation import *
 from models.requisite import Requisite
 from models.invoice import Invoice
+from models.user import User
+
+from UserLogin import UserLogin
+
+from flask_login import login_user, logout_user, current_user
 from flask_swagger_ui import get_swaggerui_blueprint
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, redirect, url_for, flash
+from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
 
-# SWAGGER - https://localhost:5000/docs
+# SWAGGER UI - https://localhost:5000/docs
 SWAGGER_URL = '/docs'
 API_URL = '/swagger'
 swagger_ui_blueprint = get_swaggerui_blueprint(
@@ -22,6 +28,10 @@ app.register_blueprint(swagger_ui_blueprint)
 
 
 @app.route('/', methods=['GET'])
+def hello():
+    return render_template('hello.html')
+
+
 @app.route('/invoices', methods=['GET'])
 def index():
     # select = request.form.post('/sortBySelect')
@@ -34,6 +44,11 @@ def requisites():
     requisites = Requisite.query.all()
     return render_template('requisite.html', requisites=requisites)
 
+
+@app.route('/users')
+def users():
+    users = User.query.all()
+    return render_template('requisite.html', users=users)
 
 
 @app.route('/create_invoice',  methods=['POST'])
@@ -60,9 +75,7 @@ def create_invoice():
        """
     # на входе тип реквизитов и сумма, на выходе id заявки и реквизиты
     id = Invoice.query.count()+1
-    # print('id', id)
     args = dict(request.args)
-    # print(args)
     try:
         options = {
             "id": id,
@@ -116,3 +129,54 @@ def get_ivoice_status():
 def create_swagger_spec():
    return json.dumps(get_apispec(app).to_dict())
 
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        user = User.query.filter(User.login == request.form['login']).one()
+        if user and check_password_hash(user.password, request.form['password']):
+
+            userLogin = UserLogin().create(user)
+            login_user(userLogin)
+            flash("Выполнен вход.")
+            return redirect(url_for('index'))
+
+        flash('Данные введены неверно!')
+
+    return render_template('login.html')
+
+
+@app.route('/registration', methods=["GET", "POST"])
+def registration():
+    if request.method == "POST":
+
+        # TODO check data
+        if User.query.filter(User.login == request.form['login']).count() == 0:
+            id = User.query.count()+1
+            pwd_hash = generate_password_hash(request.form['password'])
+            new_user = User(id=id, login=request.form['login'], password=pwd_hash, role='user')
+
+            db.session.add(new_user)
+            db.session.commit()
+
+            flash("Выполнена регистрация.")
+        else:
+            flash("Ошибка! Данный логин занят!")
+
+        return redirect(url_for('login'))
+
+    return render_template('registration.html')
+
+# @login_required
+@app.route('/logout')
+def logout():
+    logout_user()
+    flash("Выполнен выход из профиля.")
+    return redirect(url_for('login'))
+
+# @login_required
+# @LoginManager.unauthorized
+@app.route('/profile', methods=["GET"])
+def profile():
+    print(current_user)
+    return render_template('profile.html', current_user=current_user)
