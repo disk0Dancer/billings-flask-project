@@ -132,6 +132,10 @@ def create_swagger_spec():
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+
     if request.method == "POST":
         user = User.query.filter(User.login == request.form['login']).one()
         if user and check_password_hash(user.password, request.form['password']):
@@ -139,7 +143,7 @@ def login():
             userLogin = UserLogin().create(user)
             login_user(userLogin)
             flash("Выполнен вход.")
-            return redirect(url_for('index'))
+            return redirect(request.args.get('next') or url_for('index'))
 
         flash('Данные введены неверно!')
 
@@ -148,6 +152,10 @@ def login():
 
 @app.route('/registration', methods=["GET", "POST"])
 def registration():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+
     if request.method == "POST":
 
         # TODO check data

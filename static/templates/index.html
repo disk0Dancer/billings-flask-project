@@ -8,7 +8,8 @@
     <div class="btn-group float-right mb-3">
         <form method="post" action="/sort" id="sortBySelect">
             <select class="custom-select custom-select-sm" id="sortBySelector">
-              <option value="id" selected>#</option>
+              <option value="" selected disabled hidden>Сортировать по...</option>
+                <option value="id">#</option>
               <option value="amount">Сумма</option>
               <option value="requisite_id">ID реквизиты</option>
               <option value="status">Статус</option>
@@ -30,7 +31,7 @@
           <tr>
             <th scope="row">{{ invoice.id }}</th>
             <td>{{ invoice.amount }}</td>
-{#              добавить отображение информации реквищита#}
+{#             TODO  добавить отображение информации о реквизите #}
             <td>{{ invoice.requisite_id }}</td>
             <td>{{ invoice.status }}</td>
           </tr>
