@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Заявки на оплату{% endblock %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h1>Профиль пользователя:</h1>
+      <div class="mb-3">
+          {% for k, v in current_user.to_dict().items() %}
+          <p>{{ k }} : {{ v }}</p>
+        {% endfor %}
+      </div>
+  </div>
+{% endblock %}
