@@ -27,18 +27,18 @@
                      <li class="nav-item">
                         <a class="nav-link" href="/requisites">Реквизиты</a>
                     </li>
-{#                    {% if current_user. %}#}
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/invoices">Заявки на оплату <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/users">Пользователи <span class="sr-only">(current)</span></a>
-                    </li>
+                    {% if current_user.to_dict().get('role')=='admin' %}
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/invoices">Заявки на оплату <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/users">Пользователи <span class="sr-only">(current)</span></a>
+                        </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="/docs">SwaggerUI</a>
-                    </li>
-
+                        <li class="nav-item">
+                            <a class="nav-link" href="/docs">SwaggerUI</a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="/profile">Профиль</a>
                     </li>

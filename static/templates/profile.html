@@ -7,7 +7,9 @@
     <h1>Профиль пользователя:</h1>
       <div class="mb-3">
           {% for k, v in current_user.to_dict().items() %}
-          <p>{{ k }} : {{ v }}</p>
+              {% if k != 'password' %}
+                    <p>{{ k }} : {{ v }}</p>
+              {% endif %}
         {% endfor %}
       </div>
   </div>
