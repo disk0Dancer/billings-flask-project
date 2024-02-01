@@ -8,6 +8,15 @@ random.seed(0)
 
 def seed():
     with app.app_context():
+
+        try:
+            if User.query.count() > 0:
+                print('DB is not empty')
+                return
+
+        except Exception as ex:
+            print(ex)
+
         db.create_all()
 
         names = ["Василий", "Иван", "Никита", "Валерий", "Антон", "Михаил", "Артур", "Даниил"]
