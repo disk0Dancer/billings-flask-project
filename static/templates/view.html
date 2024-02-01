@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h1>{{ title }}</h1>
+    <div class="float-right mb-3">
+      <label for="searchInput" class="mr-2">Поиск:</label>
+      <input type="text" id="searchInput" class="w-25" onkeyup="searchItems(event)" />
+    </div>
+    <div class="mb-3 clearfix">
+      {% if data[0].keys() %}
+        <div class="float-left">
+          <label for="sortBySelect" class="mr-2">Сортировать по:</label>
+          <select id="sortBySelect" onchange="sortItems()">
+            {% for key in data[0].keys() %}
+                {% if key !='password' %}
+                    <option value="{{ key }}" {% if key == 'id' %}selected{% endif %}>{{ key | capitalize }}</option>
+                {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      {% endif %}
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          {% for key in data[0].keys() %}
+              {% if key != 'password' %}
+                <th onclick="sortTable('{{ key }}')">{{ key | capitalize }}</th>
+              {% endif %}
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        {% for row in data %}
+          <tr>
+            {% for key, value in row.items() %}
+                 {% if key != 'password' %}
+                    <td>{{ value }}</td>
+                 {% endif %}
+            {% endfor %}
+          </tr>
+        {% else %}
+          <tr><td colspan="{{ data[0].keys()|count }}">Нет данных.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    var tableBodyEl = document.getElementById('tableBody');
+    var searchInputEl = document.getElementById('searchInput');
+    var sortBySelectEl = document.getElementById('sortBySelect');
+    var defaultSortField = 'id';
+    var sortFields = {{ data[0].keys()|tojson }};
+    var keys = Object.keys({{ data[0].keys()|tojson }}).map(key => key.replaceAll('_', ' ').capitalize());
+
+    function searchItems(event) {
+      if (event && event.keyCode !== 13) {
+        return;
+      }
+
+      var query = searchInputEl.value.toLowerCase();
+      for (var i = 0; i < tableBodyEl.rows.length; ++i) {
+        var showRow = false;
+        var cells = tableBodyEl.rows[i].cells;
+        for (var j = 0; j < cells.length; ++j) {
+          if (cells[j].innerText.toLowerCase().includes(query)) {
+            showRow = true;
+            break;
+          }
+        }
+        tableBodyEl.rows[i].style.display = showRow ? '' : 'none';
+      }
+    }
+
+    function sortItems() {
+      if (!sortBySelectEl || !sortFields.includes(sortBySelectEl.value)) {
+        return;
+      }
+
+      var direction = 'ascending';
+      if (defaultSortField === sortBySelectEl.value && tableBodyEl.dataset.direction === 'ascending') {
+        direction = 'descending';
+      }
+
+      tableBodyEl.dataset.direction = direction;
+      sortTable(sortBySelectEl.value, direction);
+    }
+
+    function sortTable(field, direction = 'ascending') {
+      var rows = Array.from(tableBodyEl.rows).slice(1);
+      rows.sort((a, b) => {
+        var valA = a.cells[keys.indexOf(field)].innerText;
+        var valB = b.cells[keys.indexOf(field)].innerText;
+
+        switch (typeof valA) {
+          case 'string':
+            valA = valA.trim().toLowerCase();
+            break;
+          case 'number':
+            valA = parseFloat(valA);
+            break;
+          default:
+            valA = '';
+        }
+
+        switch (typeof valB) {
+          case 'string':
+            valB = valB.trim().toLowerCase();
+            break;
+          case 'number':
+            valB = parseFloat(valB);
+            break;
+          default:
+            valB = '';
+        }
+
+        if (valA < valB) {
+          return direction === 'ascending' ? -1 : 1;
+        } else if (valA > valB) {
+          return direction === 'ascending' ? 1 : -1;
+        } else {
+          return 0;
+        }
+      });
+
+      for (var i = 0; i < rows.length; ++i) {
+        tableBodyEl.appendChild(rows[i]);
+      }
+    }
+
+    window.onload = function() {
+      searchItems({ keyCode: null });
+      if (sortBySelectEl) {
+        sortItems();
+      }
+    };
+  </script>
+{% endblock %}

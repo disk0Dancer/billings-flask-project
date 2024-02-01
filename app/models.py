@@ -12,7 +12,7 @@ class Requisite(db.Model):
     limit = db.Column(db.Float)
 
     def to_dict(self):
-        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns if c.name != "id"}
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
 
 
 class Invoice(db.Model):
@@ -46,4 +46,7 @@ class User(db.Model, UserMixin):
         return str(self.__user.id)
 
     def to_dict(self):
-        return {c.name: str(getattr(self.__user, c.name)) for c in self.__user.__table__.columns}
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
+
+    def current_user(self):
+        return self.__user

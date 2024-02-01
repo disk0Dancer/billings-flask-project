@@ -27,7 +27,8 @@
                      <li class="nav-item">
                         <a class="nav-link" href="/requisites">Реквизиты</a>
                     </li>
-                    {% if current_user.to_dict().get('role')=='admin' %}
+{#                     TODO fix admin nav bar#}
+                    {% if current_user.current_user().role=='admin' %}
                         <li class="nav-item active">
                             <a class="nav-link" href="/invoices">Заявки на оплату <span class="sr-only">(current)</span></a>
                         </li>

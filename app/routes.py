@@ -38,21 +38,26 @@ def hello():
 # @roles_required('admin')
 def index():
     invoices = Invoice.query.order_by().all()
-    return render_template('index.html', invoices=invoices)
+    invoices_list = [i.to_dict() for i in invoices]
+    # print(invoices_list[0])
+    return render_template('view.html', title="Заявки", data=invoices_list)
 
 
 @app.route('/requisites')
 @login_required
 def requisites():
     requisites = Requisite.query.all()
-    return render_template('requisite.html', requisites=requisites)
+    requisites_list = [i.to_dict() for i in requisites]
+    # print(requisites_list[0])
+    return render_template('view.html', title="Реквизиты", data=requisites_list)
 
 
 @app.route('/users')
 @login_required
 def users():
     users = User.query.all()
-    return render_template('user.html', users=users)
+    users_list = [i.to_dict() for i in users]
+    return render_template('view.html', data=users_list)
 
 
 @app.route('/create_invoice',  methods=['POST'])
