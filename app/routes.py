@@ -1,14 +1,13 @@
-from app import app, db, LoginManager
-from documentation import *
-from models.requisite import Requisite
-from models.invoice import Invoice
-from models.user import User
+from app import app, db
+from app.documentation import *
+from app.models import *
 
-from UserLogin import UserLogin
+# from UserLogin import UserLogin
 
-from flask_login import login_user, logout_user, current_user
-from flask_swagger_ui import get_swaggerui_blueprint
 from flask import render_template, request, jsonify, redirect, url_for, flash
+from flask_swagger_ui import get_swaggerui_blueprint
+# from flask_user import roles_required
+from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
@@ -25,14 +24,18 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
 )
 
 app.register_blueprint(swagger_ui_blueprint)
-
+# TODO create an HTML content body for all models
 
 @app.route('/', methods=['GET'])
 def hello():
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
     return render_template('hello.html')
 
 
 @app.route('/invoices', methods=['GET'])
+@login_required
+# @roles_required('admin')
 def index():
     # select = request.form.post('/sortBySelect')
     invoices = Invoice.query.order_by().all()
@@ -40,12 +43,14 @@ def index():
 
 
 @app.route('/requisites')
+@login_required
 def requisites():
     requisites = Requisite.query.all()
     return render_template('requisite.html', requisites=requisites)
 
 
 @app.route('/users')
+@login_required
 def users():
     users = User.query.all()
     return render_template('user.html', users=users)
@@ -140,8 +145,10 @@ def login():
         user = User.query.filter(User.login == request.form['login']).one()
         if user and check_password_hash(user.password, request.form['password']):
 
-            userLogin = UserLogin().create(user)
+            userLogin = User().create(user)
+
             login_user(userLogin)
+
             flash("Выполнен вход.")
             return redirect(request.args.get('next') or url_for('index'))
 
@@ -158,8 +165,11 @@ def registration():
 
     if request.method == "POST":
 
-        # TODO check data
-        if User.query.filter(User.login == request.form['login']).count() == 0:
+        is_exist =  User.query.filter(User.login == request.form['login']).count() > 0
+        login_len = len(request.form['login']) > 4
+        pwd_len = len(request.form['password']) > 4
+        # current_user
+        if (not is_exist) and pwd_len and login_len:
             id = User.query.count()+1
             pwd_hash = generate_password_hash(request.form['password'])
             new_user = User(id=id, login=request.form['login'], password=pwd_hash, role='user')
@@ -175,16 +185,17 @@ def registration():
 
     return render_template('registration.html')
 
-# @login_required
+@login_required
 @app.route('/logout')
 def logout():
     logout_user()
+
     flash("Выполнен выход из профиля.")
     return redirect(url_for('login'))
 
-# @login_required
-# @LoginManager.unauthorized
+
 @app.route('/profile', methods=["GET"])
+@login_required
 def profile():
-    print(current_user)
+    # print(current_user)
     return render_template('profile.html', current_user=current_user)
