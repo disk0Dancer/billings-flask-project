@@ -37,7 +37,6 @@ def hello():
 @login_required
 # @roles_required('admin')
 def index():
-    # select = request.form.post('/sortBySelect')
     invoices = Invoice.query.order_by().all()
     return render_template('index.html', invoices=invoices)
 
@@ -185,8 +184,9 @@ def registration():
 
     return render_template('registration.html')
 
-@login_required
+
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
 

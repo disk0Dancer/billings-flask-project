@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 # from flask_user import UserManager
 
-
+# TODO change DB connection string
 app = Flask(__name__, template_folder='../static/templates')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -32,7 +32,7 @@ def load_user(id):
 
 from app.routes import *
 from app.db_seed import seed
-seed()
+# seed()
 
 
 
