@@ -33,7 +33,7 @@
 <img width="300" alt="image" src="https://github.com/gchurakov/billings-flask-project/assets/89835485/caf84f24-eae8-439b-b41e-bb9993ac2e12">
 <img width="300" alt="image" src="https://github.com/gchurakov/billings-flask-project/assets/89835485/6b53e79d-d2a0-4f33-8cb2-3088ce6c90c9">
 <img width="300" alt="image" src="https://github.com/gchurakov/billings-flask-project/assets/89835485/857f5009-9e7d-4d85-adbf-69dc99827687">
-<img width="1209" alt="image" src="https://github.com/gchurakov/billings-flask-project/assets/89835485/6b28a05e-e8ec-42fc-996c-6c0cdfb1ec58">
+<img width="300" alt="image" src="https://github.com/gchurakov/billings-flask-project/assets/89835485/6b28a05e-e8ec-42fc-996c-6c0cdfb1ec58">
 
 
 
