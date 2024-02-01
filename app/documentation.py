@@ -59,8 +59,6 @@ def get_apispec(app):
     spec.components.schema("CreateOutput", schema=CreateOutputSchema)
     spec.components.schema("Error", schema=ErrorSchema)
 
-    # create_tags(spec)
-
     load_docstrings(spec, app)
 
     return spec

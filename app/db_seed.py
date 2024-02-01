@@ -1,7 +1,7 @@
-from app import app, db
-from models import *
+from app import app
+from app.models import *
 
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 import random
 random.seed(0)
 
