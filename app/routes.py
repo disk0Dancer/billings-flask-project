@@ -35,8 +35,12 @@ def hello():
 
 @app.route('/invoices', methods=['GET'])
 @login_required
-# @roles_required('admin')
 def index():
+
+    if current_user.current_user().role != 'admin':
+        flash('Доступ запрещен! Необходима роль: "admin"')
+        return redirect(url_for('profile'))
+
     invoices = Invoice.query.order_by().all()
     invoices_list = [i.to_dict() for i in invoices]
     # print(invoices_list[0])
@@ -55,6 +59,11 @@ def requisites():
 @app.route('/users')
 @login_required
 def users():
+
+    if current_user.current_user().role != 'admin':
+        flash('Доступ запрещен! Необходима роль: "admin"')
+        return redirect(url_for('profile'))
+
     users = User.query.all()
     users_list = [i.to_dict() for i in users]
     return render_template('view.html', data=users_list)
