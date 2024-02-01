@@ -13,7 +13,7 @@
       {% if data[0].keys() %}
         <div class="float-left">
           <label for="sortBySelect" class="mr-2">Сортировать по:</label>
-          <select id="sortBySelect" onchange="sortItems()">
+          <select id="sortBySelect" onchange="sortTable(sortBySelectEl.value)">
             {% for key in data[0].keys() %}
                 {% if key !='password' %}
                     <option value="{{ key }}" {% if key == 'id' %}selected{% endif %}>{{ key | capitalize }}</option>
@@ -78,6 +78,57 @@
       }
     }
 
+    function compareValues(key, dir) {
+      return function(a, b) {
+        if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+          return 0;
+        }
+
+        var va = typeof a[key] === 'string' ? a[key].toString().toLowerCase() : a[key];
+        var vb = typeof b[key] === 'string' ? b[key].toString().toLowerCase() : b[key];
+
+        return dir * ((va < vb) ? -1 : ((va > vb) ? 1 : 0));
+      };
+    }
+
+    function sortTable(columnName) {
+      var direction = 1;
+      if (sortBySelectEl && sortBySelectEl.value === columnName) {
+        direction = -1;
+      }
+
+      var sortedData = sortFields.slice();
+      sortedData.sort(compareValues(columnName, direction));
+      populateTable(sortedData);
+    }
+
+    function populateTable(dataToPopulate) {
+      tableBodyEl.innerHTML = '';
+      for (const entry of dataToPopulate) {
+        addEntryToTable(entry);
+      }
+    }
+
+    function addEntryToTable(entry) {
+      const row = document.createElement('tr');
+
+      for (const [key, value] of Object.entries(entry)) {
+        if (key !== 'password') {
+          const tdElement = document.createElement('td');
+          tdElement.textContent = value;
+          row.appendChild(tdElement);
+        }
+      }
+
+      tableBodyEl.appendChild(row);
+    }
+
+    {#window.onload = function() {#}
+    {#  searchItems({ keyCode: null });#}
+    {#  if (sortBySelectEl) {#}
+    {#    sortTable(sortBySelectEl.value);#}
+    {#  }#}
+    {# };#}
 
 
 
