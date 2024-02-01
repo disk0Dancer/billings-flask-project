@@ -1,16 +1,12 @@
-from app import app, db
-from app.documentation import *
-from app.models import *
-
-# from UserLogin import UserLogin
-
 from flask import render_template, request, jsonify, redirect, url_for, flash
 from flask_swagger_ui import get_swaggerui_blueprint
-# from flask_user import roles_required
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
+from app import app, db
+from app.documentation import *
+from app.models import *
 
 # SWAGGER UI - https://localhost:5000/docs
 SWAGGER_URL = '/docs'

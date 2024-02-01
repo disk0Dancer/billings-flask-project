@@ -57,7 +57,7 @@
     var sortBySelectEl = document.getElementById('sortBySelect');
     var defaultSortField = 'id';
     var sortFields = {{ data|tojson }};
-    var keys = Object.keys({{ data[0]|tojson }}).map(key => key.replaceAll('_', ' '));
+    var keys = Object.keys({{ data[0]|tojson }});
 
     function searchItems(event) {
       if (event && event.keyCode !== 13) {
@@ -78,90 +78,7 @@
       }
     }
 
-    {#function sortItems() {#}
-    {#  if (!sortBySelectEl || !sortFields.includes(sortBySelectEl.value)) {#}
-    {#    return;#}
-    {#  }#}
 
-    {#  var direction = 'ascending';#}
-    {#  if (defaultSortField === sortBySelectEl.value && tableBodyEl.dataset.direction === 'ascending') {#}
-    {#    direction = 'descending';#}
-    {#  }#}
-    {##}
-    {#  tableBodyEl.dataset.direction = direction;#}
-    {#  sortTable(sortBySelectEl.value, direction);#}
-    {#}#}
-    {##}
-    {#function sortItems() {#}
-    {#  if (!sortBySelectEl || !sortFields.includes(sortBySelectEl.value)) {#}
-    {#    return;#}
-    {#  }#}
-    {##}
-    {#  var direction = 'ascending';#}
-    {#  if (defaultSortField === sortBySelectEl.value && tableBodyEl.dataset.direction === 'ascending') {#}
-    {#    direction = 'descending';#}
-    {#  }#}
-    {##}
-    {#  tableBodyEl.dataset.direction = direction;#}
-    {#  sortTable(sortBySelectEl.value, direction);#}
-    {#}#}
-    {##}
-    {#function sortTable(field, direction = 'ascending') {#}
-    {#  var rows = [...tableBodyEl.rows];#}
-    {#  rows.sort((a, b) => {#}
-    {#    var idxA = keys.indexOf(field);#}
-    {#    var idxB = keys.indexOf(field);#}
-    {##}
-    {#    if (idxA >= 0 && idxB >= 0) {#}
-    {#      var valA = a.cells[idxA].innerText;#}
-    {#      var valB = b.cells[idxB].innerText;#}
-    {##}
-    {#      switch (typeof valA) {#}
-    {#        case 'string':#}
-    {#          valA = valA.trim().toLowerCase();#}
-    {#          break;#}
-    {#        case 'number':#}
-    {#          valA = parseFloat(valA);#}
-    {#          break;#}
-    {#        default:#}
-    {#          valA = '';#}
-    {#      }#}
-    {##}
-    {#      switch (typeof valB) {#}
-    {#        case 'string':#}
-    {#          valB = valB.trim().toLowerCase();#}
-    {#          break;#}
-    {#        case 'number':#}
-    {#          valB = parseFloat(valB);#}
-    {#          break;#}
-    {#        default:#}
-    {#          valB = '';#}
-    {#      }#}
-    {##}
-    {#      if (valA < valB) {#}
-    {#        return direction === 'ascending' ? -1 : 1;#}
-    {#      } else if (valA > valB) {#}
-    {#        return direction === 'ascending' ? 1 : -1;#}
-    {#      } else {#}
-    {#        return 0;#}
-    {#      }#}
-    {#    } else {#}
-    {#      return 0;#}
-    {#    }#}
-    {#  });#}
-    {##}
-    {#  for (var i = 0; i < rows.length; ++i) {#}
-    {#    tableBodyEl.appendChild(rows[i]);#}
-    {#  }#}
-    {#}#}
-    {##}
-    {#window.onload = function() {#}
-    {#  searchItems({ keyCode: null });#}
-    {#  if (sortBySelectEl) {#}
-    {#    sortItems();#}
-    {#  }#}
-    {#};#}
-    {#};#}
 
 
   </script>

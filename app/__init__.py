@@ -2,7 +2,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
-# from flask_user import UserManager
 
 # TODO change DB connection string
 app = Flask(__name__, template_folder='../templates')
@@ -20,14 +19,11 @@ loginManager.login_message = 'Необходимо войти в профиль.
 loginManager.login_message_category = 'success'
 
 
-# userManager = UserManager(app=app, db=db, UserClass=UserLogin)
-
 @loginManager.user_loader
 def load_user(id):
     print('load_user')
     # print(User().from_db(id).to_dict())
     return User().from_db(id)
-
 
 
 from app.routes import *

@@ -1,9 +1,9 @@
-from app import app
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec_webframeworks.flask import FlaskPlugin
 from marshmallow import Schema, fields
 
+from app import app
 
 class CreateInputSchema(Schema):
     amount = fields.Int(description="Сумма", required=True, example=500)

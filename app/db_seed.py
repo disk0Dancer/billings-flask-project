@@ -1,8 +1,9 @@
+from werkzeug.security import generate_password_hash
+import random
+
 from app import app
 from app.models import *
 
-from werkzeug.security import generate_password_hash
-import random
 random.seed(0)
 
 
