@@ -39,7 +39,9 @@ def index():
 
     invoices = Invoice.query.order_by().all()
     invoices_list = [i.to_dict() for i in invoices]
-    return render_template('view.html', title="Заявки", data=invoices_list)
+    # invoices_list = list(map(Invoice.to_dict, invoices))
+    keys = {str(i): key for i, key in enumerate(invoices_list[0].keys())} # порядок столбцов
+    return render_template('view.html', title="Заявки", data=invoices_list, keys=keys)
 
 
 @app.route('/requisites')
@@ -47,7 +49,8 @@ def index():
 def requisites():
     requisites = Requisite.query.all()
     requisites_list = [i.to_dict() for i in requisites]
-    return render_template('view.html', title="Реквизиты", data=requisites_list)
+    keys = {str(i): key for i, key in enumerate(requisites_list[0].keys())}# порядок столбцов
+    return render_template('view.html', title="Реквизиты", data=requisites_list, keys=keys)
 
 
 @app.route('/users')
@@ -60,7 +63,8 @@ def users():
 
     users = User.query.all()
     users_list = [i.to_dict() for i in users]
-    return render_template('view.html', data=users_list)
+    keys = {str(i): key for i, key in enumerate(users_list[0].keys())}# порядок столбцов
+    return render_template('view.html', data=users_list, keys=keys)
 
 
 @app.route('/create_invoice',  methods=['POST'])
