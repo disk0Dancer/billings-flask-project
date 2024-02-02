@@ -41,12 +41,12 @@ class User(db.Model, UserMixin):
         self.__user = user
         return self
 
-
     def get_id(self):
         return str(self.__user.id)
 
     def to_dict(self):
         return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
 
+    @property
     def current_user(self):
         return self.__user

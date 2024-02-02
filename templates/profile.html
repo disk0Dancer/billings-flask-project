@@ -6,7 +6,7 @@
   <div class="container mt-5">
     <h1>Профиль пользователя:</h1>
       <div class="mb-3">
-          {% for k, v in current_user.current_user().to_dict().items() %}
+          {% for k, v in current_user.current_user.to_dict().items() %}
               {% if k != 'password' %}
                     <p>{{ k }} : {{ v }}</p>
               {% endif %}

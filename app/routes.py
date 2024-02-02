@@ -20,7 +20,7 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
 )
 
 app.register_blueprint(swagger_ui_blueprint)
-# TODO create an HTML content body for all models
+
 
 @app.route('/', methods=['GET'])
 def hello():
@@ -33,13 +33,12 @@ def hello():
 @login_required
 def index():
 
-    if current_user.current_user().role != 'admin':
+    if current_user.current_user.role != 'admin':
         flash('Доступ запрещен! Необходима роль: "admin"')
         return redirect(url_for('profile'))
 
     invoices = Invoice.query.order_by().all()
     invoices_list = [i.to_dict() for i in invoices]
-    # print(invoices_list[0])
     return render_template('view.html', title="Заявки", data=invoices_list)
 
 
@@ -48,7 +47,6 @@ def index():
 def requisites():
     requisites = Requisite.query.all()
     requisites_list = [i.to_dict() for i in requisites]
-    # print(requisites_list[0])
     return render_template('view.html', title="Реквизиты", data=requisites_list)
 
 
@@ -56,7 +54,7 @@ def requisites():
 @login_required
 def users():
 
-    if current_user.current_user().role != 'admin':
+    if current_user.current_user.role != 'admin':
         flash('Доступ запрещен! Необходима роль: "admin"')
         return redirect(url_for('profile'))
 
@@ -88,11 +86,11 @@ def create_invoice():
 
        """
     # на входе тип реквизитов и сумма, на выходе id заявки и реквизиты
-    id = Invoice.query.count()+1
+    new_id = Invoice.query.count()+1
     args = dict(request.args)
     try:
         options = {
-            "id": id,
+            "id": new_id,
             "amount": int(args['amount']),
             "status": "ожидает оплаты",
             "requisite_id": int(args['requisite_id']),
@@ -101,13 +99,13 @@ def create_invoice():
         print(invoice.to_dict())
         db.session.add(invoice)
         db.session.commit()
-        return jsonify({'id': id}), 200
+        return jsonify({'id': new_id}), 200
     except Exception as ex:
-        return jsonify("Bad Request: " + str(ex)), 500
+        return jsonify("Bad Request: " + str(ex)), 400
 
 
 @app.route(f'/get_invoice_status',  methods=['GET'])
-def get_ivoice_status():
+def get_invoice_status():
     """
        ---
        get:
@@ -151,17 +149,23 @@ def login():
         return redirect(url_for('profile'))
 
     if request.method == "POST":
-        user = User.query.filter(User.login == request.form['login']).one()
-        if user and check_password_hash(user.password, request.form['password']):
 
-            userLogin = User().create(user)
+        try:
+            user = User.query.filter(User.login == request.form['login']).one()
+        except Exception as ex:
+            print(ex)
+            flash('Пользователь с таким логином не найден')
+        else:
+            if user and check_password_hash(user.password, request.form['password']):
 
-            login_user(userLogin)
+                user_login = User().create(user)
 
-            flash("Выполнен вход.")
-            return redirect(request.args.get('next') or url_for('index'))
+                login_user(user_login)
 
-        flash('Данные введены неверно!')
+                flash("Выполнен вход.")
+                return redirect(request.args.get('next') or url_for('index'))
+
+            flash('Неверный пароль!')
 
     return render_template('login.html')
 
@@ -174,19 +178,23 @@ def registration():
 
     if request.method == "POST":
 
-        is_exist =  User.query.filter(User.login == request.form['login']).count() > 0
+        is_exist = User.query.filter(User.login == request.form['login']).count() > 0
         login_len = len(request.form['login']) > 4
         pwd_len = len(request.form['password']) > 4
-        # current_user
-        if (not is_exist) and pwd_len and login_len:
-            id = User.query.count()+1
-            pwd_hash = generate_password_hash(request.form['password'])
-            new_user = User(id=id, login=request.form['login'], password=pwd_hash, role='user')
 
-            db.session.add(new_user)
-            db.session.commit()
+        if not is_exist:
+            if pwd_len and login_len:
+                id = User.query.count()+1
+                pwd_hash = generate_password_hash(request.form['password'])
+                new_user = User(id=id, login=request.form['login'], password=pwd_hash, role='user')
 
-            flash("Выполнена регистрация.")
+                db.session.add(new_user)
+                db.session.commit()
+
+                flash("Выполнена регистрация.")
+            else:
+                flash("Ошибка! Логин и пароль должны быть длиннее 4-х символов!")
+
         else:
             flash("Ошибка! Данный логин занят!")
 
@@ -199,7 +207,6 @@ def registration():
 @login_required
 def logout():
     logout_user()
-
     flash("Выполнен выход из профиля.")
     return redirect(url_for('login'))
 
@@ -207,5 +214,4 @@ def logout():
 @app.route('/profile', methods=["GET"])
 @login_required
 def profile():
-    # print(current_user)
     return render_template('profile.html', current_user=current_user)
