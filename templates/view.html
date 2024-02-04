@@ -11,9 +11,10 @@
     </div>
     <div class="mb-3 clearfix">
       {% if data[0].keys() %}
+          
         <div class="float-left">
           <label for="sortBySelect" class="mr-2">Сортировать по:</label>
-          <select id="sortBySelect" onchange="sortTable(this.value)">
+          <select id="sortBySelect" onchange="sortRows()">
             {% for key in data[0].keys() %}
                 {% if key !='password' %}
                     <option value="{{ key }}" {% if key == 'id' %}selected{% endif %}>{{ key | capitalize }}</option>
@@ -21,14 +22,15 @@
             {% endfor %}
           </select>
         </div>
+          
       {% endif %}
     </div>
     <table class="table">
       <thead>
-        <tr class="#header-row">
+        <tr class="header-row">
           {% for key in data[0].keys() %}
               {% if key != 'password' %}
-                <th data-field="{{ key }}" onclick="sortTable('{{ key }}')">{{ key | capitalize }}</th>
+                <th data-field="{{ key }}" >{{ key | capitalize }}</th>
               {% endif %}
           {% endfor %}
         </tr>
@@ -51,108 +53,62 @@
 {% endblock %}
 
 {% block scripts %}
-  <script>
-    var tableBodyEl = document.getElementById('tableBody');
-    var searchInputEl = document.getElementById('searchInput');
-    var sortBySelectEl = document.getElementById('sortBySelect');
-    const defaultSortField = 'id';
-    const sortFields = {{ data|tojson }};
-    const keys = {{ keys|tojson }}
 
-    function searchItems(event) {
-      if (event && event.keyCode !== 13) {
-        return;
-      }
+    <script type="text/javascript" src="static/js/lib/jquery-3.7.1.min.js"></script>
 
-      var query = searchInputEl.value.toLowerCase();
-      for (var i = 0; i < tableBodyEl.rows.length; ++i) {
-        var showRow = false;
-        var cells = tableBodyEl.rows[i].cells;
-        for (var j = 0; j < cells.length; ++j) {
-          if (cells[j].innerText.toLowerCase().includes(query)) {
-            showRow = true;
-            break;
-          }
-        }
-        tableBodyEl.rows[i].style.display = showRow ? '' : 'none';
-      }
-    }
+    <script type="text/javascript">
+        var tableBodyEl = document.getElementById('tableBody');
+        var searchInputEl = document.getElementById('searchInput');
+        var sortBySelectEl = document.getElementById('sortBySelect');
+        const keys = {{ keys|tojson }}
 
-    function compareValues(key, dir) {
-      return (a, b) => {
-        if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
-          return 0;
+        function searchItems(event) {
+            if (event && event.keyCode !== 13) {
+            return;
+            }
+
+            var query = searchInputEl.value.toLowerCase();
+            for (var i = 0; i < tableBodyEl.rows.length; ++i) {
+            var showRow = false;
+            var cells = tableBodyEl.rows[i].cells;
+            for (var j = 0; j < cells.length; ++j) {
+                if (cells[j].innerText.toLowerCase().includes(query)) {
+                showRow = true;
+                break;
+                }
+            }
+            tableBodyEl.rows[i].style.display = showRow ? '' : 'none';
+            }
         }
 
-        const av = a[key];
-        const bv = b[key];
+         function sortRows() {
+             var message = {key: sortBySelectEl.value};
+             $('#tableBody').empty();
+             {#console.log(message);#}
+             $.ajax({
+                 type: 'POST',
+                 url: '{{ url }}', // todo url
+                 processData: false,  // tell jQuery not to process the data
+                 contentType: false,  // tell jQuery not to set contentType
+                 data: JSON.stringify(message),
+                 success: (data) => {
+                     {#console.log(data);#}
+                     for (i in data) {
+                         ent = data[i];
+                         row = "<tr>";
 
-        if (av == null && bv != null) {
-          return -dir;
-        } else if (av != null && bv == null) {
-          return dir;
-        } else if (av == null && bv == null) {
-          return 0;
-        }
-
-        if (typeof av !== "number" && typeof bv !== "number") {
-          return dir * String(av).localeCompare(String(bv), undefined, { numeric: true });
-        }
-
-        return dir * (av - bv);
-      };
-    }
-
-    function createHeaderCell(label) {
-      const thElement = document.createElement("th");
-      thElement.textContent = label;
-      thElement.addEventListener("click", () => sortTable(label));
-      return thElement;
-    }
-
-    function updateTableHeaders(columns) {
-      const headerRow = document.querySelector("#header-row tr");
-      headerRow.innerHTML = "";
-
-      for (const key of columns) {
-        headerRow.append(createHeaderCell(key));
-      }
-    }
-
-
-    function sortTable(columnName) {
-      let direction = 1;
-
-      {#if (sortBySelectEl && sortBySelectEl.value === columnName) {#}
-      {#  direction = -direction;#}
-      {# }#}
-
-
-        const shallowCopiedSortFields = [...sortFields];
-        shallowCopiedSortFields.sort(compareValues(columnName, direction));
-        populateTable(shallowCopiedSortFields);
-    }
-
-    function populateTable(dataToPopulate) {
-      tableBodyEl.innerHTML = '';
-      for (const entry of dataToPopulate) {
-        addEntryToTable(entry);
-      }
-    }
-
-    function addEntryToTable(entry) {
-      const row = document.createElement('tr');
-
-      for (const [key, value] of Object.entries(keys)){
-        if (value !== 'password') {
-          const tdElement = document.createElement('td');
-          tdElement.textContent = entry[value];
-          row.appendChild(tdElement);
-        }
-      }
-      tableBodyEl.appendChild(row);
-    }
-
+                         for (k in keys) {
+                             row += "<td>" + ent[keys[k]] + "</td>"
+                         }
+                         $('#tableBody').append(row + "</tr>")
+                     }
+                 },
+                 error: function(error) {
+                        console.log(error);
+                    }
+             });
+         }
 
   </script>
+
 {% endblock %}

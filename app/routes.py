@@ -1,3 +1,5 @@
+from functools import wraps
+
 from flask import render_template, request, jsonify, redirect, url_for, flash
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_login import login_user, logout_user, current_user, login_required
@@ -7,6 +9,7 @@ import json
 from app import app, db
 from app.documentation import *
 from app.models import *
+from app.auth import *
 
 # SWAGGER UI - https://localhost:5000/docs
 SWAGGER_URL = '/docs'
@@ -22,49 +25,79 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
 app.register_blueprint(swagger_ui_blueprint)
 
 
-@app.route('/', methods=['GET'])
+def admin_required(func):
+    @wraps(func)
+    def inside_f(*args,**kwargs):
+        if current_user.current_user.role != 'admin':
+            flash('Доступ запрещен! Необходима роль: "admin"')
+            return redirect(url_for('profile'))
+        return func(*args, **kwargs)
+    inside_f.__name__ = func.__name__
+    return inside_f
+
+
+@app.route('/', methods=['GET'], endpoint='hello')
 def hello():
-    if current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         return redirect(url_for('profile'))
     return render_template('hello.html')
 
 
-@app.route('/invoices', methods=['GET'])
+@app.route('/invoices', methods=["GET", "POST"], endpoint='invoices')
 @login_required
+@admin_required
 def index():
 
-    if current_user.current_user.role != 'admin':
-        flash('Доступ запрещен! Необходима роль: "admin"')
-        return redirect(url_for('profile'))
+    if request.method == "POST":
+        key = json.loads(request.data)['key']
+        invoices = Invoice.query.order_by(key).all()
+        invoices_list = list(map(Invoice.to_dict, invoices))
 
-    invoices = Invoice.query.order_by().all()
-    invoices_list = [i.to_dict() for i in invoices]
-    # invoices_list = list(map(Invoice.to_dict, invoices))
-    keys = {str(i): key for i, key in enumerate(invoices_list[0].keys())} # порядок столбцов
-    return render_template('view.html', title="Заявки", data=invoices_list, keys=keys)
+        return jsonify(invoices_list)
+    else:
+        invoices = Invoice.query.order_by().all()
+        invoices_list = list(map(Invoice.to_dict, invoices))
+        keys = {str(i): key for i, key in enumerate(invoices_list[0].keys())} # порядок столбцов
+
+        return render_template('view.html', title="Заявки", data=invoices_list, keys=keys, url='/invoices')
 
 
-@app.route('/requisites')
+@app.route('/requisites', methods=["GET", "POST"], endpoint='requisites')
 @login_required
 def requisites():
-    requisites = Requisite.query.all()
-    requisites_list = [i.to_dict() for i in requisites]
-    keys = {str(i): key for i, key in enumerate(requisites_list[0].keys())}# порядок столбцов
-    return render_template('view.html', title="Реквизиты", data=requisites_list, keys=keys)
+
+    if request.method == "POST":
+        key = json.loads(request.data)['key']
+        requisites = Requisite.query.order_by(key).all()
+        requisites_list = list(map(Requisite.to_dict, requisites))
+
+        return jsonify(requisites_list)
+    else:
+        requisites = Requisite.query.all()
+        requisites_list = list(map(Requisite.to_dict, requisites))
+        keys = {str(i): key for i, key in enumerate(requisites_list[0].keys())}
+
+        return render_template('view.html', title="Реквизиты", data=requisites_list, keys=keys, url='/requisites')
 
 
-@app.route('/users')
+@app.route('/users', methods=["GET", "POST"], endpoint='users')
 @login_required
+@admin_required
 def users():
 
-    if current_user.current_user.role != 'admin':
-        flash('Доступ запрещен! Необходима роль: "admin"')
-        return redirect(url_for('profile'))
+    if request.method == "POST":
+        key = json.loads(request.data)['key']
+        users = User.query.order_by(key).all()
+        users_list = list(map(User.to_dict, users))
 
-    users = User.query.all()
-    users_list = [i.to_dict() for i in users]
-    keys = {str(i): key for i, key in enumerate(users_list[0].keys())}# порядок столбцов
-    return render_template('view.html', data=users_list, keys=keys)
+        return jsonify(users_list)
+
+    else:
+        users = User.query.all()
+        users_list = list(map(User.to_dict, users))
+        keys = {str(i): key for i, key in enumerate(users_list[0].keys())}# порядок столбцов
+
+        return render_template('view.html', data=users_list, keys=keys, url='/users')
 
 
 @app.route('/create_invoice',  methods=['POST'])
@@ -140,7 +173,6 @@ def get_invoice_status():
         return jsonify("Bad Request: " + str(ex)), 400
 
 
-
 @app.route('/swagger')
 def create_swagger_spec():
    return json.dumps(get_apispec(app).to_dict())
@@ -149,7 +181,7 @@ def create_swagger_spec():
 @app.route('/login', methods=["GET", "POST"])
 def login():
 
-    if current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         return redirect(url_for('profile'))
 
     if request.method == "POST":
@@ -177,7 +209,7 @@ def login():
 @app.route('/registration', methods=["GET", "POST"])
 def registration():
 
-    if current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         return redirect(url_for('profile'))
 
     if request.method == "POST":
