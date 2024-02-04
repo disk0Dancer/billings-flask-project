@@ -17,7 +17,7 @@
           <select id="sortBySelect" onchange="sortRows()">
             {% for key in data[0].keys() %}
                 {% if key !='password' %}
-                    <option value="{{ key }}" {% if key == 'id' %}selected{% endif %}>{{ key | capitalize }}</option>
+                    <option value="{{ key }}" {% if key == 'id' %}selected{% endif %}>{{ key|capitalize}}</option>
                 {% endif %}
             {% endfor %}
           </select>
@@ -30,7 +30,7 @@
         <tr class="header-row">
           {% for key in data[0].keys() %}
               {% if key != 'password' %}
-                <th data-field="{{ key }}" >{{ key | capitalize }}</th>
+                <th data-field="{{ key }}" onclick="sortRowsByColumn('{{ key }}')">{{ key|capitalize }}</th>
               {% endif %}
           {% endfor %}
         </tr>
@@ -60,6 +60,7 @@
         var tableBodyEl = document.getElementById('tableBody');
         var searchInputEl = document.getElementById('searchInput');
         var sortBySelectEl = document.getElementById('sortBySelect');
+        var sortKey = 'id';
         const keys = {{ keys|tojson }}
 
         function searchItems(event) {
@@ -81,13 +82,20 @@
             }
         }
 
+        function sortRowsByColumn(column){
+            if (sortBySelectEl.value !== column){
+                sortBySelectEl.value = column;
+            }
+            sortRows();
+        }
+
          function sortRows() {
-             var message = {key: sortBySelectEl.value};
+             var message = {prevkey: sortKey, key: sortBySelectEl.value};
              $('#tableBody').empty();
              {#console.log(message);#}
              $.ajax({
                  type: 'POST',
-                 url: '{{ url }}', // todo url
+                 url: '{{ url }}',
                  processData: false,  // tell jQuery not to process the data
                  contentType: false,  // tell jQuery not to set contentType
                  data: JSON.stringify(message),
@@ -101,7 +109,8 @@
                              row += "<td>" + ent[keys[k]] + "</td>"
                          }
                          $('#tableBody').append(row + "</tr>")
-                     }
+                     };
+                     sortKey = sortBySelectEl.value;
                  },
                  error: function(error) {
                         console.log(error);

@@ -1,5 +1,6 @@
 from functools import wraps
 
+from sqlalchemy import text
 from flask import render_template, request, jsonify, redirect, url_for, flash
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_login import login_user, logout_user, current_user, login_required
@@ -9,7 +10,6 @@ import json
 from app import app, db
 from app.documentation import *
 from app.models import *
-from app.auth import *
 
 # SWAGGER UI - https://localhost:5000/docs
 SWAGGER_URL = '/docs'
@@ -67,10 +67,16 @@ def index():
 def requisites():
 
     if request.method == "POST":
-        key = json.loads(request.data)['key']
-        requisites = Requisite.query.order_by(key).all()
-        requisites_list = list(map(Requisite.to_dict, requisites))
+        data = json.loads(request.data)
+        key = data['key']
+        prev_key = data['prevkey']
 
+        if key == prev_key:
+            requisites = Requisite.query.order_by(text(key + ' desc')).all()
+        else:
+            requisites = Requisite.query.order_by(key).all()
+
+        requisites_list = list(map(Requisite.to_dict, requisites))
         return jsonify(requisites_list)
     else:
         requisites = Requisite.query.all()
